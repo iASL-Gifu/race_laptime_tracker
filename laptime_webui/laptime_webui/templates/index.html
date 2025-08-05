@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>RCカー ラップタイムランキング</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 2em; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.5em; border-bottom: 1px solid #ccc; text-align: left; }
+    input { width: 90%; padding: 0.2em; }
+    .delete-btn { color: red; cursor: pointer; }
+    .timer { font-size: 1.5em; margin-bottom: 1em; color: green; }
+  </style>
+</head>
+<body>
+  <h1>🏁 ラップタイムランキング</h1>
+  <div class="timer">⏱️ 計測中タイム: <span id="live-timer">--</span> 秒</div>
+  <table>
+    <thead>
+      <tr><th>順位</th><th>タイム</th><th>日時</th><th>ドライバー名</th><th>削除</th></tr>
+    </thead>
+    <tbody id="lap-table-body">
+      {% for lap in lap_times %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ lap.time }}</td>
+          <td>{{ lap.timestamp }}</td>
+          <td><input type="text" value="{{ lap.name }}" onchange="updateName({{ loop.index0 }}, this.value)"></td>
+          <td><span class="delete-btn" onclick="deleteEntry({{ loop.index0 }})">❌</span></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    const socket = io();
+    let timerInterval = null;
+    let startTime = null;
+
+    function updateName(index, name) {
+      fetch('/update_name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index, name })
+      });
+    }
+
+    function deleteEntry(index) {
+      fetch('/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index })
+      });
+    }
+
+    socket.on('new_lap', data => {
+      const tbody = document.getElementById('lap-table-body');
+      tbody.innerHTML = '';
+      data.lap_times.forEach((lap, i) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${lap.time.toFixed(3)} 秒</td>
+          <td>${lap.timestamp}</td>
+          <td><input type="text" value="${lap.name}" onchange="updateName(${i}, this.value)"></td>
+          <td><span class="delete-btn" onclick="deleteEntry(${i})">❌</span></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      stopLiveTimer();  // 新しい記録が入ったら計測終了
+    });
+
+    socket.on('start_timer', () => {
+      startLiveTimer();
+    });
+
+    function startLiveTimer() {
+      startTime = Date.now();
+      const timerElement = document.getElementById('live-timer');
+
+      stopLiveTimer();  // 二重起動防止
+
+      timerInterval = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        timerElement.textContent = elapsed.toFixed(3);
+      }, 100);
+    }
+
+    function stopLiveTimer() {
+      if (timerInterval !== null) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      document.getElementById('live-timer').textContent = '--';
+    }
+  </script>
+</body>
+</html>
