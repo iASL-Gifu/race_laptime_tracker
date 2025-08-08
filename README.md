@@ -1,6 +1,6 @@
 # race_laptime_tracker
 
-Hokuyo 2D LiDARを使用したRCカーレース向けのラップタイム計測システムです。
+RCカーレース向けのラップタイム計測システムです。スタートライン上のコース端に設置したHokuyo 2D LiDARを使用してスタート＆ゴールを検知し、Web UIで結果を表示します。
 
 ![画面](doc/screen.png)
 
@@ -40,6 +40,25 @@ Hokuyo 2D LiDARを使用したRCカーレース向けのラップタイム計測
 
 ---
 
+## 📁 構成
+
+### laser_processor
+#### laser_processor.cpp
+2D LiDAR点群のうち視野角を小さく絞り、観測距離が閾値以下かどうかをTrue/Falseでpublishする
+### lap_recorder
+#### lap_timer_node.py
+True受け取りを車両通過とみなし、タイム計測を開始/終了する
+1度の通過における重複処理防止のため5秒間のデバウンスタイムを設定
+#### web_publish_node.py
+ラップタイムを送信
+### laptime_webui
+#### app.py
+ラップタイムの履歴を読み込み、受け取った新たな記録とともにランキング形式に並べ替え
+#### index.html
+Socket.IOでリアルタイムにUI表示
+
+---
+
 ## 📦 インストール
 
 ```bash
@@ -76,6 +95,7 @@ colcon build
 ```bash
 source install/setup.bash
 ros2 run urg_node urg_node_driver --ros-args -p ip_address:="192.168.0.10"
+# ↑ LiDARのIPアドレス
 ```
 #### ターミナル2
 ```bash
@@ -100,49 +120,4 @@ python3 ~/ros2_ws/src/race_laptime_tracker/laptime_webui/laptime_webui/app.py
 ### 3. UIページの起動
 - Webブラウザで `localhost:5000` にアクセスする。
 
----
-
-## 💡 トラブルシューティング
-
-
-
----
-
-## ⚙ オプション設定とカスタマイズ
-
-
-
----
-
-## 👤 開発者
-
-#### 岐阜大学 工学部 アレックス研究室 (iASL)
-- Site: https://www.iasl.info.gifu-u.ac.jp/  
-- Github: https://github.com/iASL-Gifu/
-
----
-
-## ライセンス
-
-本プロジェクトは Apache License 2.0 の下でライセンスされています。  
-詳細は [LICENSE](./LICENSE) ファイルをご覧ください。
-
-### Apache License 2.0（概要）
-
-このライセンスの下では、以下のことが許可されています：
-
-- 商用利用
-- 修正
-- 配布
-- 特許使用
-- 私的使用
-
-ただし、以下の義務があります：
-
-- 元のライセンス文の保持（著作権表示とライセンスの明記）
-- 改変の有無を記載
-- 商標の使用制限
-
-このライセンスは「現状のまま（AS IS）」で提供されており、  
-いかなる保証もなく、作者は一切の責任を負いません。
-
+![画面](doc/usage.png)
