@@ -1,8 +1,10 @@
 # race_laptime_tracker
 
+![画面](doc/screen.png)
+
 RCカーレース向けのラップタイム計測システムです。スタートライン上のコース端に設置したHokuyo 2D LiDARを使用してスタート＆ゴールを検知し、Web UIで結果を表示します。
 
-![画面](doc/screen.png)
+![画面](doc/usage.png)
 
 ---
 
@@ -119,5 +121,3 @@ python3 ~/ros2_ws/src/race_laptime_tracker/laptime_webui/laptime_webui/app.py
 
 ### 3. UIページの起動
 - Webブラウザで `localhost:5000` にアクセスする。
-
-![画面](doc/usage.png)
