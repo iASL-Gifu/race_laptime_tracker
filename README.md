@@ -33,10 +33,10 @@ RCカーレース向けのラップタイム計測システムです。スター
 
 ## 🖥️ 使用技術
 
-#### バックエンド (pixkit_dashboard.py)
+#### バックエンド
 - Flask
 - SocketIO
-#### フロントエンド (index.html)
+#### フロントエンド
 - HTML/CSS/JavaScript
 - Socket.IO
 
